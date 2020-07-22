@@ -1,0 +1,40 @@
+#!/bin/python3
+
+import requests
+import sys
+import json
+
+args = sys.argv
+args.pop(0)
+
+response = requests.get(f"https://api.github.com/search/users?q={args[0]}")
+users = response.json()["items"]
+
+if (len(users) == 0): print("No accounts with your query were found"); exit(0)
+
+for user in range(len(users)):
+	print(f"{user + 1}: {users[user]['login']}")
+
+wasFound = input("\nDid you find the account you were searching for? (y/n) ")
+found = (wasFound, "y")[len(wasFound) == 0]
+
+if (found.lower()[0] == "y"):
+	try: account = int(input("Input the account's number listed above: "))
+	except: print("Not a number"); exit(0)
+else: exit(0)
+
+try:
+	accResponse = requests.get(f"https://api.github.com/users/{users[(int(account) - 1)]['login']}")
+except:
+	print("The number you entered was not found in the listed items from above")
+	exit(0)
+acc = accResponse.json()
+
+print(f'\n\n{acc["login"]}\'s Github profile\n')
+info = ["Bio", "Public Repos", "Followers", "Following", "Name", "Company", "Created at"]
+
+for item in info:
+	print(f'{item}: {acc[item.lower().replace(" ", "_")]}')
+
+
+
